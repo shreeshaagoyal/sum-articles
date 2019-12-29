@@ -2,22 +2,6 @@ import React, { Component } from "react";
 import Modal from "./components/Modal";
 import axios from "axios";
 
-const sumarticles = [
-    {
-        id: 1,
-        title: "Emperor Penguins are now endangered, warn biologists",
-        read_time: "2",
-        summary: "sample summary",
-        hyperlink: "https://www.telegraph.co.uk/news/earth/environment/climatechange/10933964/Emperor-Penguins-are-now-endangered-warn-biologists.html"
-    },
-    {
-        id: 2,
-        title: "Blondes 'to die out in 200 years'",
-        read_time: "2",
-        summary: "sample summary",
-        hyperlink: "http://news.bbc.co.uk/2/hi/health/2284783.stm"
-    }
-];
 class App extends Component {
     constructor(props) {
         super(props);
@@ -27,21 +11,59 @@ class App extends Component {
                 title: "",
                 hyperlink: ""
             },
-            sumarticleList: sumarticles
+            sumarticleList: []
         };
     }
+
+    componentDidMount() {
+        this.refreshList();
+    }
+
+    refreshList = () => {
+        axios
+            .get("http://localhost:8000/api/sumarticles/")
+            .then(res => this.setState({ sumarticleList: res.data }))
+            .catch(err => console.log(err));
+    }
+
     toggle = () => {
         this.setState({ modal: !this.state.modal });
     };
     handleSubmit = item => {
+        console.log("Submit button clicked");
         this.toggle();
-        console.log("save" + JSON.stringify(item));
+        if (item.id) {
+            axios
+                .put(`http://localhost:8000/api/sumarticles/${item.id}/`, item)
+                .then(res => this.refreshList());
+        }
+        else {
+            axios
+                .post("http://localhost:8000/api/sumarticles/", item, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*"
+                    }
+                })
+                .then(res => this.refreshList())
+                .catch(err => console.log(err));
+        }
+        console.log("saved " + JSON.stringify(item));
     };
     handleDelete = item => {
-        console.log("delete" + JSON.stringify(item));
+        console.log("Delete button clicked");
+        if (item.id) {
+            axios
+                .delete(`http://localhost:8000/api/sumarticles/${item.id}/`)
+                .then(res => this.refreshList());
+            console.log("deleted " + JSON.stringify(item));
+        }
+        else {
+            console.log("Invalid article");
+        }
     };
     createItem = () => {
-        const item = { title: "", hyperlink: "" };
+        const item = { title: "", read_time: 0, summary: "", hyperlink: "" };
         this.setState({ activeItem: item, modal: !this.state.modal });
     };
     editItem = item => {
@@ -56,9 +78,9 @@ class App extends Component {
                 <td> {item.read_time} </td>
                 <td> {item.summary} </td>
                 <td>
-                    <a href={item.hyperlink} target="_blank" className="btn btn-outline-primary mr-2"> Link </a>
-                    <button className="btn btn-outline-secondary mr-2"> Edit </button>
-                    <button className="btn btn-outline-danger"> Delete </button>
+                    <a href={item.hyperlink} target="_blank" rel="noopener noreferrer" className="btn btn-outline-primary mr-2"> Link </a>
+                    <button onClick={() => this.editItem(item)} className="btn btn-outline-secondary mr-2"> Edit </button>
+                    <button onClick={() => this.handleDelete(item)} className="btn btn-outline-danger"> Delete </button>
                 </td>
             </tr>
         ));
@@ -66,8 +88,8 @@ class App extends Component {
     render() {
         return (
             <main className="content">
-                <h1 className="text-white text-uppercase text-center my-4">RESEARCH HELPER</h1>
-                <div className="col-lg-11 mx-auto p-0">
+                <h1 className="text-white text-center my-4">RESEARCH HELPER</h1>
+                <div className="col-lg-11 mx-auto p-0" style={{"marginBottom": "1em"}}>
                     <div className="card p-3">
                         <div className="">
                             <button onClick={this.createItem} className="btn btn-warning">Add article</button>
