@@ -6,5 +6,49 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #41b3a3;
+  background-color: #f8b601;
+  font-size: 0.95em;
+}
+
+.typewriter {
+  font-family: "Lucida Console", Monaco, monospace;
+  display: table;
+  margin: 0 auto;
+}
+
+.typewriter-text {
+	display: inline-block;
+	overflow: hidden;
+	letter-spacing: .15em;
+	animation: typing .85s steps(15, end), cursor .75s step-end infinite;
+	white-space: nowrap;
+	border-right: .15em solid orange;
+}
+
+@keyframes typing {
+    from { width: 0% }
+    to { width: 100% }
+}
+
+@keyframes cursor {
+    from, to { border-color: transparent }
+    50% { border-color: orange; }
+}
+
+.icon {
+	cursor: pointer;
+	font-size: 1.25em;
+}
+
+.btn-circle-lg {
+    width: 50px;
+    height: 50px;
+    padding: 3px 0px 0px 0px;
+    border-radius: 35px;
+    text-align: center;
+    font-size: 24px;
+    line-height: 1.33;
+    margin: 0.5em;
+    float: right;
+    box-shadow: 2px 2px 5px grey;
 }

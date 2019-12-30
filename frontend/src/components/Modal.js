@@ -50,6 +50,11 @@ export default class CustomModal extends Component {
                                 name="hyperlink"
                                 value={this.state.activeItem.hyperlink}
                                 onChange={this.handleChange}
+                                onKeyPress={event => {
+                                    if (event.key === "Enter") {
+                                        onSave(this.state.activeItem);
+                                    }
+                                }}
                                 placeholder="Enter article hyperlink"
                             />
                         </FormGroup>

@@ -39,12 +39,7 @@ class App extends Component {
         }
         else {
             axios
-                .post("http://localhost:8000/api/sumarticles/", item, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    }
-                })
+                .post("http://localhost:8000/api/sumarticles/", item)
                 .then(res => this.refreshList())
                 .catch(err => console.log(err));
         }
@@ -68,7 +63,38 @@ class App extends Component {
     };
     editItem = item => {
         this.setState({ activeItem: item, modal: !this.state.modal });
-    }
+    };
+    
+    // TODO: rearrange UX for how summarization is done?
+    // TODO: decouple summarization and read time estimation
+    summarizeItem = item => {
+        axios
+            // Sends the hyperlink of the article to the exposed API endpoint for analysis
+            .get(`http://localhost:8000/test/?id=${item.hyperlink}`)
+            .then(res => {
+                let summary;
+                if (res.data.data[1] === "") {
+                    summary = "Sorry, could not summarize.";
+                } else {
+                    summary = res.data.data[1];
+                }
+                console.log(summary);
+                axios
+                    // GET request returns an array
+                    // First element is the calculated read time in minutes
+                    // Second elmeent is the summary
+                    // We update the `read_time` and `summary` fields of the item in the db
+                    .put(`http://localhost:8000/api/sumarticles/${item.id}/`, {
+                        title: item.title,
+                        read_time: res.data.data[0],
+                        summary: summary,
+                        hyperlink: item.hyperlink
+                    })
+                    .then(res => this.refreshList())
+                    .catch(err => console.log(err));
+            })
+            .catch(err => console.log(err));
+    };
     renderItems = () => {
         const newItems = this.state.sumarticleList;
 
@@ -78,28 +104,40 @@ class App extends Component {
                 <td> {item.read_time} </td>
                 <td> {item.summary} </td>
                 <td>
-                    <a href={item.hyperlink} target="_blank" rel="noopener noreferrer" className="btn btn-outline-primary mr-2"> Link </a>
-                    <button onClick={() => this.editItem(item)} className="btn btn-outline-secondary mr-2"> Edit </button>
-                    <button onClick={() => this.handleDelete(item)} className="btn btn-outline-danger"> Delete </button>
+                    <div title="Go to article">
+                        <a href={item.hyperlink} target="_blank" rel="noopener noreferrer">
+                            <i className="fa fa-external-link icon"></i>
+                        </a>
+                    </div>
                 </td>
+                <td> <div title="Edit"> <i onClick={() => this.editItem(item)} className="fa fa-edit icon"></i> </div> </td>
+                <td> <div title="Delete"> <i onClick={() => this.handleDelete(item)} className="fa fa-trash icon"></i> </div> </td>
+                <td> <div title="Summarize"> <i onClick={() => this.summarizeItem(item)} className="fa fa-list-alt icon"></i> </div> </td>
             </tr>
         ));
     };
     render() {
         return (
             <main className="content">
-                <h1 className="text-white text-center my-4">RESEARCH HELPER</h1>
-                <div className="col-lg-11 mx-auto p-0" style={{"marginBottom": "1em"}}>
+                <div className="typewriter">
+                    <h1 className="text-white text-center my-5 typewriter-text">ResearchLib</h1>
+                </div>
+                <div className="col-lg-11 mx-auto p-0">
                     <div className="card p-3">
-                        <div className="">
-                            <button onClick={this.createItem} className="btn btn-warning">Add article</button>
+                        <div style={{"marginBottom": "1em"}}>
+                            <button title="Add new article" onClick={this.createItem} className="btn btn-primary btn-circle-lg">
+                                <i className="fa fa-plus icon"></i>
+                            </button>
                         </div>
-                        <table className="table table-bordered table-hover">
-                            <thead>
+                        <table className="table table-hover">
+                            <thead className="thead">
                                 <tr>
-                                    <th scope="col">Article Title</th>
-                                    <th scope="col">Read Time (min)</th>
+                                    <th scope="col" style={{"width": "10em"}}>Article Title</th>
+                                    <th scope="col" style={{"width": "8em"}}>Read Time (min)</th>
                                     <th scope="col">Summary</th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
                                     <th scope="col"></th>
                                 </tr>
                             </thead>
