@@ -35,12 +35,18 @@ class App extends Component {
         if (item.id) {
             axios
                 .put(`http://localhost:8000/api/sumarticles/${item.id}/`, item)
-                .then(res => this.refreshList());
+                .then(res => {
+                    this.refreshList();
+                    this.summarizeItem(item);
+                });
         }
         else {
             axios
                 .post("http://localhost:8000/api/sumarticles/", item)
-                .then(res => this.refreshList())
+                .then(res => {
+                    this.refreshList();
+                    this.summarizeItem(res.data);
+                })
                 .catch(err => console.log(err));
         }
         console.log("saved " + JSON.stringify(item));
@@ -58,7 +64,7 @@ class App extends Component {
         }
     };
     createItem = () => {
-        const item = { title: "", read_time: 0, summary: "", hyperlink: "" };
+        const item = { title: "", read_time: 0, summary: "...", hyperlink: "" };
         this.setState({ activeItem: item, modal: !this.state.modal });
     };
     editItem = item => {
@@ -112,7 +118,6 @@ class App extends Component {
                 </td>
                 <td> <div title="Edit"> <i onClick={() => this.editItem(item)} className="fa fa-edit icon"></i> </div> </td>
                 <td> <div title="Delete"> <i onClick={() => this.handleDelete(item)} className="fa fa-trash icon"></i> </div> </td>
-                <td> <div title="Summarize"> <i onClick={() => this.summarizeItem(item)} className="fa fa-list-alt icon"></i> </div> </td>
             </tr>
         ));
     };
@@ -122,7 +127,7 @@ class App extends Component {
                 <div className="typewriter">
                     <h1 className="text-white text-center my-5 typewriter-text">ResearchLib</h1>
                 </div>
-                <div className="col-lg-11 mx-auto p-0">
+                <div className="col-lg-11 mx-auto" style={{"padding": "0 0 1em 0"}}>
                     <div className="card p-3">
                         <div style={{"marginBottom": "1em"}}>
                             <button title="Add new article" onClick={this.createItem} className="btn btn-primary btn-circle-lg">
@@ -135,7 +140,6 @@ class App extends Component {
                                     <th scope="col" style={{"width": "10em"}}>Article Title</th>
                                     <th scope="col" style={{"width": "8em"}}>Read Time (min)</th>
                                     <th scope="col">Summary</th>
-                                    <th scope="col"></th>
                                     <th scope="col"></th>
                                     <th scope="col"></th>
                                     <th scope="col"></th>
