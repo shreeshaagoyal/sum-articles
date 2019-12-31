@@ -52,3 +52,7 @@ body {
     float: right;
     box-shadow: 2px 2px 5px grey;
 }
+
+thead {
+	color: #a1a5a6;
+}

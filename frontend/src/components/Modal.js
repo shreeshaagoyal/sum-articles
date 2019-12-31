@@ -26,16 +26,18 @@ export default class CustomModal extends Component {
         const activeItem = { ...this.state.activeItem, [name]: value };
         this.setState({ activeItem });
     };
+
     render() {
         const { toggle, onSave } = this.props;
         return (
-            <Modal isOpen={true} toggle={toggle}>
+            <Modal isOpen={true} toggle={toggle} autoFocus={false}>
                 <ModalHeader toggle={toggle}> Add new article to research library </ModalHeader>
                 <ModalBody>
                     <Form>
                         <FormGroup>
                             <Label for="title">Article Title</Label>
                             <Input
+                                autoFocus={true}
                                 type="text"
                                 name="title"
                                 value={this.state.activeItem.title}
